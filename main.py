@@ -9,13 +9,11 @@ def log(*args):
 def config():
 	global NUMBER_OF_CELLS, speed_of_snake, SIZE_OF_CELL
 
-	cells = input('Введите ширину и высоту поля в клетках через запятую: ')
+	cells = input('Введите ширину и высоту поля в клетках через пробел: ')
 	speed = input('Введите скорость змейки (5-15): ')
-	cell_size =	input('Введите размер клетки в пикселях: ')
 
-	if cells.strip() != '': 	NUMBER_OF_CELLS = tuple([int(x) for x in cells.split(',')])
+	if cells.strip() != '': 	NUMBER_OF_CELLS = tuple([int(x) for x in cells.split()])
 	if speed.strip() != '': 	speed_of_snake = int(speed)
-	if cell_size.strip() != '': SIZE_OF_CELL = int(cell_size)
 
 speed_of_snake = 11
 
@@ -30,14 +28,14 @@ black = (0, 0, 0)
 
 class Snake():
 	def __init__(self, length = 5):
-		self.head_x = size[1] // 2
-		self.head_y = size[1] // 2
+		self.head_x = NUMBER_OF_CELLS[0] // 2
+		self.head_y = NUMBER_OF_CELLS[1] // 2
 		self.way = 1
-		self.last_point = (self.head_x - 5 * SIZE_OF_CELL, self.head_y)
+		self.last_point = (self.head_x - 5, self.head_y)
 		self.tail = []
 
 		for i in range(length):
-			self.tail.append([self.head_x - i * SIZE_OF_CELL, self.head_y])
+			self.tail.append([self.head_x - i, self.head_y])
 
 	def draw(self):
 		i = 1
@@ -47,24 +45,25 @@ class Snake():
 
 			block = pygame.Surface((SIZE_OF_CELL, SIZE_OF_CELL))
 			block.fill(brown)
-			window.blit(block, pos)
+			window.blit(block, (pos[0] * SIZE_OF_CELL, pos[1] * SIZE_OF_CELL))
 
-		window.blit(heads[self.way], self.tail[0])
+		window.blit(heads[self.way], (self.tail[0][0] *SIZE_OF_CELL, self.tail[0][1] *SIZE_OF_CELL) )
 
 	def move(self):
 		global not_over, apple_point
 
-		if self.way == 0: different_of_now_and_next_pos = (0, -SIZE_OF_CELL)
-		if self.way == 1: different_of_now_and_next_pos = (SIZE_OF_CELL, 0)
-		if self.way == 2: different_of_now_and_next_pos = (0, SIZE_OF_CELL)
-		if self.way == 3: different_of_now_and_next_pos = (-SIZE_OF_CELL, 0)
+		if self.way == 0: different_of_now_and_next_pos = (0, -1)
+		if self.way == 1: different_of_now_and_next_pos = (1, 0)
+		if self.way == 2: different_of_now_and_next_pos = (0, 1)
+		if self.way == 3: different_of_now_and_next_pos = (-1, 0)
 
 		self.last_point =  self.tail.pop(-1)
 
-		self.tail.insert(0, [self.tail[0][0] + different_of_now_and_next_pos[0], self.tail[0][1] + different_of_now_and_next_pos[1]])
+		self.tail.insert(0, [self.tail[0][0] + different_of_now_and_next_pos[0], 
+							self.tail[0][1] + different_of_now_and_next_pos[1]])
 
-		if self.tail[0][0] < 0 or self.tail[0][0] > size[0] - SIZE_OF_CELL or \
-			self.tail[0][1] < 0 or self.tail[0][1] > size[1] - SIZE_OF_CELL:		#проверка выхода за поле
+		if self.tail[0][0] < 0 or self.tail[0][0] > NUMBER_OF_CELLS[0] - 1 or \
+			self.tail[0][1] < 0 or self.tail[0][1] > NUMBER_OF_CELLS[1] - 1:		#проверка выхода за поле
 			not_over = False
 
 		for i in range(len(self.tail)):								#проверка наезда на хвост
@@ -127,8 +126,8 @@ def quit():
 
 def set_apple():
 	global apple_point
-	x = randint(0, NUMBER_OF_CELLS[0] - 1) * SIZE_OF_CELL
-	y = randint(0, NUMBER_OF_CELLS[1] - 1) * SIZE_OF_CELL
+	x = randint(0, NUMBER_OF_CELLS[0] - 1)
+	y = randint(0, NUMBER_OF_CELLS[1] - 1)
 
 	if snake.tail.count([x, y]):
 		set_apple()
@@ -136,7 +135,7 @@ def set_apple():
 	elif apple_point == []:
 		apple_point = [x, y]
 	
-	window.blit(apple, apple_point)
+	window.blit(apple, (apple_point[0] * SIZE_OF_CELL, apple_point[1] * SIZE_OF_CELL))
 
 def draw_gaming_interface():
 	window.fill(black)
@@ -161,7 +160,7 @@ def start_app():
 
 	size = NUMBER_OF_CELLS[0] * SIZE_OF_CELL, NUMBER_OF_CELLS[1] * SIZE_OF_CELL
 
-	pygame.display.set_caption('Snake v0.1')
+	pygame.display.set_caption('Snake v1.0')
 	window = pygame.display.set_mode(size)
 
 	button_new_game = 	Button('New game', light_grey, min(size) // 15, size[1] // 2.7, start_game, min(size) // 40)
